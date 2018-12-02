@@ -7,10 +7,10 @@ library(tidyr)
 library(dplyr)
 
 
-reshape_by_resource_type = function(generic_fields, resource_type) {
+reshape_by_resource_type = function(generic_fields, resource_type_str) {
   return(
     generic_fields %>%
-      filter(resource_type == resource_type) %>%
+      filter(resource_type == resource_type_str) %>%
       select(-resource_type) %>%
       spread(field_name, field_value)
   )
