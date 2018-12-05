@@ -90,9 +90,9 @@ colnames(generic_fields)
 project_relations_from_non_project_pages = generic_fields %>% 
   filter(resource_type != "project") %>%
   filter(grepl("^ProjectRelation: .*$", field_name)) %>%
-  mutate(project_id = field_value) %>%
+  mutate(project_id = as.character(field_value)) %>%
   mutate(reference_resource_type = resource_type) %>%
-  mutate(reference_resource_id = resource_id) %>%
+  mutate(reference_resource_id = as.character(resource_id)) %>%
   mutate(relation_type = gsub("ProjectRelation: ", "", field_name)) %>%
   mutate(relation_found_on = "REFERENCE_RESOURCE") %>%
   select(project_id, reference_resource_type, reference_resource_id, relation_type, relation_found_on)
@@ -142,18 +142,22 @@ project_relation_field_names = c(
 project_relations_from_project_pages = generic_fields %>% 
   filter(resource_type == "project") %>%
   filter(field_name %in% project_relation_field_names) %>%
-  mutate(project_id = resource_id) %>%
+  mutate(project_id = as.character(resource_id)) %>%
   # TODO: NEXT STEP: reference_resource_type und reference_resource_id aus field_value extracten
-  mutate(reference_resource_type = field_value) %>%
-  mutate(reference_resource_id = field_value) %>%
+  mutate(reference_resource_type = str_match(field_value, '<a class="intern" href="/gepris/([a-z]*)/')[,2]) %>%
+  mutate(reference_resource_id = str_match(field_value, '<a class="intern" href="/gepris/[a-z]*/(\\d*)')[,2]) %>%
   mutate(relation_type = field_name) %>%
   mutate(relation_found_on = "PROJECT") %>%
   select(project_id, reference_resource_type, reference_resource_id, relation_type, relation_found_on)
 
-  
+
 # TODO: replace synonyms in project_relations_from_project_pages$relation_type (cluster synonyms (like c("Applicant", "Applicants")))
 
+str(project_relations_from_project_pages)
 # TODO: merge project_relations_from_project_pages and project_relations_from_non_project_pages
+bar = project_relations_from_project_pages %>% 
+  bind_rows(project_relations_from_non_project_pages)
+
 
 # foo = project_relations_from_project_pages %>%
 #   filter(!grepl("^.*<a class.*$", field_value)) 
