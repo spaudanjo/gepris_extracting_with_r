@@ -143,7 +143,7 @@ project_relations_from_project_pages = generic_fields %>%
   filter(resource_type == "project") %>%
   filter(field_name %in% project_relation_field_names) %>%
   mutate(project_id = as.character(resource_id)) %>%
-  # TODO: NEXT STEP: reference_resource_type und reference_resource_id aus field_value extracten
+  # reference_resource_type und reference_resource_id aus field_value extracten
   mutate(reference_resource_type = str_match(field_value, '<a class="intern" href="/gepris/([a-z]*)/')[,2]) %>%
   mutate(reference_resource_id = str_match(field_value, '<a class="intern" href="/gepris/[a-z]*/(\\d*)')[,2]) %>%
   mutate(relation_type = field_name) %>%
@@ -151,12 +151,57 @@ project_relations_from_project_pages = generic_fields %>%
   select(project_id, reference_resource_type, reference_resource_id, relation_type, relation_found_on)
 
 
-# TODO: replace synonyms in project_relations_from_project_pages$relation_type (cluster synonyms (like c("Applicant", "Applicants")))
-
 str(project_relations_from_project_pages)
 # TODO: merge project_relations_from_project_pages and project_relations_from_non_project_pages
-bar = project_relations_from_project_pages %>% 
+project_relations = project_relations_from_project_pages %>% 
   bind_rows(project_relations_from_non_project_pages)
+
+
+
+
+
+
+
+
+
+# TODO: replace synonyms in project_relations_from_project_pages$relation_type (cluster synonyms (like c("Applicant", "Applicants")))
+
+# Reduce(f = "-", x = 1:6, accumulate = T)
+
+synonym_groups = c(
+  c("Applicant", "Applicants", "As Applicant")
+)
+
+foo = project_relations %>% 
+  mutate(relation_type = case_when(
+    relation_type %in% c("Applicant", "Applicants", "As Applicant") ~ "Applicant",
+    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
+    TRUE ~ relation_type
+    )
+  )
+
+# foo = Reduce(function(project_relations, synonym_group){
+#   return(
+#     project_relations %>%
+#       mutate(relation_type = ifelse(relation_type %in% synonym_group, synonym_group[1], relation_type))
+#   )
+# }, project_relations_from_project_pages, accumulate = F)
+
+
+
+
+
+
+
+
+
+
+# str_match(project_relations$relation_type, 'As\\s(.*)')
+bar = project_relations %>%
+  select(relation_type) %>%
+  # mutate(relation_type = str_match(relation_type, '^As (.*)$')[,2])
+  distinct(relation_type) %>%
+  arrange(relation_type)
 
 
 # foo = project_relations_from_project_pages %>%
