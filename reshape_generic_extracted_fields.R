@@ -152,7 +152,7 @@ project_relations_from_project_pages = generic_fields %>%
 
 
 str(project_relations_from_project_pages)
-# TODO: merge project_relations_from_project_pages and project_relations_from_non_project_pages
+# merge project_relations_from_project_pages and project_relations_from_non_project_pages
 project_relations = project_relations_from_project_pages %>% 
   bind_rows(project_relations_from_non_project_pages)
 
@@ -172,9 +172,57 @@ synonym_groups = c(
   c("Applicant", "Applicants", "As Applicant")
 )
 
+# I identified the following groups which should be 'normalised' to only one of their representations
+# As Former applicant
+# Former applicant
+# Former applicants
+# 
+# As Cooperation partner
+# Cooperation partner
+# Cooperation partners
+# 
+# As Deputy spokesperson
+# Deputy spokespeople
+# Deputy spokesperson
+# 
+# As Foreign spokesperson
+# Foreign spokespeople
+# Foreign spokesperson
+# 
+# As Head
+# Head
+# Heads
+# 
+# As International Co-Applicant
+# International Co-Applicant
+# International Co-Applicants
+# 
+# As Participating Person
+# Participating Person
+# Participating Persons
+# 
+# As Participating scientist
+# Participating scientist
+# Participating scientists
+# 
+# As Project leader
+# Project leader
+# Project leaders
+# 
+# As Spokesperson
+# Spokesperson
+# Spokespersons
+# 
+# Participating Institution
+# Participating institution
+
 foo = project_relations %>% 
   mutate(relation_type = case_when(
     relation_type %in% c("Applicant", "Applicants", "As Applicant") ~ "Applicant",
+    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
+    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
+    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
+    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
     relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
     TRUE ~ relation_type
     )
@@ -186,6 +234,8 @@ foo = project_relations %>%
 #       mutate(relation_type = ifelse(relation_type %in% synonym_group, synonym_group[1], relation_type))
 #   )
 # }, project_relations_from_project_pages, accumulate = F)
+
+bar
 
 
 
