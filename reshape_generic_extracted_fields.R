@@ -209,7 +209,7 @@ project_relations = project_relations_from_project_pages %>%
     ) 
   ) 
 
-View(unique(project_relations$relation_type))
+# View(unique(project_relations$relation_type))
 
 cleaned_project_relations = project_relations %>%
   select(-relation_found_on) %>%
@@ -247,38 +247,11 @@ extract_start_and_end_year_of_term = function(term_str) {
   return(c(NA, NA))
 }
   
-  
-
-
-  # def extractFundingDateRange(parentElement: Element) = {
-  #   val fundingDateRange = parentElement
-  #   .select("span.name:matches(Term) + span.value")
-  #   .text()
-  #   
-  #   val fromToRegex = "^.*from ([0-9]+) to ([0-9]+).*$".r
-  #   val sinceRegex = "^.*since ([0-9]+).*$".r
-  #   val fundedInRegex = "^.*Funded in ([0-9]+).*$".r
-  #   val untilRegex = "^.*until ([0-9]+).*$".r
-  #   val FundingOngoing = "^.*Currently being funded.*$".r
-  #   
-  #   val (start, end) = fundingDateRange match {
-  #     case fromToRegex(start, end) => (start, end)
-  #     case sinceRegex(seit) => (seit, "")
-  #     case fundedInRegex(in) => (in, in)
-  #     case untilRegex(bis) => ("", bis)
-  #     case FundingOngoing() => ("ongoing", "ongoing")
-  #     case _ => ("", "")
-  #   }
-  #   
-  #   (start, end)
-  # }
-
-
 # length(str_match("from 1995 to 2004", "^.*from ([0-9]+) to ([0-9]+).*$"))
 # length(str_match("since 2016<br>", "^.*since ([0-9]+).*$"))
 # length(str_match("Funded in 2005", "^.*Funded in ([0-9]+).*$"))
-extract_start_and_end_year_of_term("from 1995 to 2004")
-extract_start_and_end_year_of_term("since 2016<br>")
+extract_start_and_end_year_of_term("from 1995 to 2004")[1]
+extract_start_and_end_year_of_term("since 2016<br>")[1]
 extract_start_and_end_year_of_term("Funded in 2005")
 extract_start_and_end_year_of_term("until 2008<br>")
 extract_start_and_end_year_of_term("Currently being funded.")
@@ -293,8 +266,12 @@ projects = reshape_by_resource_type(generic_fields %>%
   # And we can ignore the field "Project identifier" (since it's core information is already covered by the column resource_id)
   filter(! field_name %in% c("Subject Area", "Participating subject areas", "Project identifier"))
                                       , "project") %>%
+  # mutate(funding_start_year = extract_start_and_end_year_of_term(Term)[[1]]) %>%
+  mutate(funding_start_year = Term) %>%
+  mutate(funding_end_year = (extract_start_and_end_year_of_term(Term)[2])) # %>%
+#   select(-Term)
 
-
+extract_start_and_end_year_of_term(projects$Term[30])[1]
 
 
 people = reshape_by_resource_type(generic_fields, "person")
