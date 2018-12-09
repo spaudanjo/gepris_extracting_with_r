@@ -214,16 +214,7 @@ View(unique(project_relations$relation_type))
 cleaned_project_relations = project_relations %>%
   select(-relation_found_on) %>%
   unique()
-  
 
-
-# TODO
-# Subject Areas and Participating subject areas should be handled separately and should be extracted into 
-# their own respective tables (also since there is no link-href string extraction needed for a referenced resource id)
-project_subject_areas_field_names = c(
-  "Participating subject areas", 
-  "Subject Area"
-)
 
 projects = reshape_by_resource_type(generic_fields %>%
 # For projects, we wan't to remove alle fields (that would be transformed now into columns) that 
@@ -239,3 +230,55 @@ people = reshape_by_resource_type(generic_fields, "person")
 institutions = reshape_by_resource_type(generic_fields, "institution")
 
 
+
+# Subject Areas and Participating subject areas should be handled separately and should be extracted into 
+# their own respective tables
+
+# # .split("<br>")
+# # .flatMap(_.split(", "))
+# 
+# foo = subject_area_test %>% 
+#   strsplit("<br> ") %>%
+#   unlist %>%
+#   strsplit(", ") %>%
+#   unlist
+# 
+# foo
+# typeof(foo)
+# foo[2]
+# 
+# 
+# subject_area_test = "Theoretical Computer Science <br> Interactive and Intelligent Systems, Image and Language Processing, Computer Graphics and Visualisation"
+  
+
+extract_subject_areas_from_generic_fields = function(generic_fields, subject_area_column_name) {
+  return(
+    generic_fields %>% 
+      filter(resource_type == "project") %>%
+      filter(field_name == subject_area_column_name) %>%
+      # 1. split by <br>
+      mutate(field_value = strsplit(as.character(field_value), "<br> ")) %>% 
+      unnest(field_value) %>%
+      # 2. split by comma
+      mutate(field_value = strsplit(as.character(field_value), ", ")) %>% 
+      unnest(field_value) %>%
+      select(
+        project_id = resource_id,
+        subject_area = field_value
+      ) %>%
+      mutate(subject_area = gsub("<br>", "", subject_area))
+  )
+}
+
+project_subject_areas = extract_subject_areas_from_generic_fields(generic_fields, "Subject Area")
+project_participating_subject_areas = extract_subject_areas_from_generic_fields(generic_fields, "Participating subject areas")
+
+
+# WARNING: 
+# Even though most of the times they are used to separate subject areas, 
+# sometimes commas appear within one subject area. 
+# Check for example the subject area string of the project with the id=246965231: 
+# It is Operating, Communication, Database and Distributed Systems (which is just one subject area) 
+
+# TODO: we could investigate wether a more accurate splitting is possible by doing a matching with the crawled and extracted subject areas 
+# from the catalog search form of the GEPRIS system or the "official" webpage which lists the subject areas
