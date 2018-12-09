@@ -216,6 +216,75 @@ cleaned_project_relations = project_relations %>%
   unique()
 
 
+
+extract_start_and_end_year_of_term = function(term_str) {
+  
+  from_to = str_match(term_str, "^.*from ([0-9]+) to ([0-9]+).*$")
+  if(length(from_to) == 3 && !is.na(from_to[1])) {
+    return(c(from_to[2], from_to[3]))
+  }
+  
+  since = str_match(term_str, "^.*since ([0-9]+).*$")
+  if(length(since) == 2 && !is.na(since[1])) {
+    return(c(since[2], NA))
+  }
+  
+  fundedIn = str_match(term_str, "^.*Funded in ([0-9]+).*$")
+  if(length(fundedIn) == 2 && !is.na(fundedIn[1])) {
+    return(c(fundedIn[2], fundedIn[2]))
+  }
+  
+  until = str_match(term_str, "^.*until ([0-9]+).*$")
+  if(length(until) == 2 && !is.na(until[1])) {
+    return(c(NA, until[2]))
+  }
+  
+  ongoing = str_match(term_str, "^.*Currently being funded.*$")
+  if(length(ongoing) == 1 && !is.na(ongoing[1])) {
+    return(c("ongoing", "ongoing"))
+  }
+  
+  return(c(NA, NA))
+}
+  
+  
+
+
+  # def extractFundingDateRange(parentElement: Element) = {
+  #   val fundingDateRange = parentElement
+  #   .select("span.name:matches(Term) + span.value")
+  #   .text()
+  #   
+  #   val fromToRegex = "^.*from ([0-9]+) to ([0-9]+).*$".r
+  #   val sinceRegex = "^.*since ([0-9]+).*$".r
+  #   val fundedInRegex = "^.*Funded in ([0-9]+).*$".r
+  #   val untilRegex = "^.*until ([0-9]+).*$".r
+  #   val FundingOngoing = "^.*Currently being funded.*$".r
+  #   
+  #   val (start, end) = fundingDateRange match {
+  #     case fromToRegex(start, end) => (start, end)
+  #     case sinceRegex(seit) => (seit, "")
+  #     case fundedInRegex(in) => (in, in)
+  #     case untilRegex(bis) => ("", bis)
+  #     case FundingOngoing() => ("ongoing", "ongoing")
+  #     case _ => ("", "")
+  #   }
+  #   
+  #   (start, end)
+  # }
+
+
+# length(str_match("from 1995 to 2004", "^.*from ([0-9]+) to ([0-9]+).*$"))
+# length(str_match("since 2016<br>", "^.*since ([0-9]+).*$"))
+# length(str_match("Funded in 2005", "^.*Funded in ([0-9]+).*$"))
+extract_start_and_end_year_of_term("from 1995 to 2004")
+extract_start_and_end_year_of_term("since 2016<br>")
+extract_start_and_end_year_of_term("Funded in 2005")
+extract_start_and_end_year_of_term("until 2008<br>")
+extract_start_and_end_year_of_term("Currently being funded.")
+extract_start_and_end_year_of_term("asd3jf fajksj 5")
+
+
 projects = reshape_by_resource_type(generic_fields %>%
 # For projects, we wan't to remove alle fields (that would be transformed now into columns) that 
 # have relationship character, as these are handled separately in the cleaned_project_relations table
@@ -223,7 +292,10 @@ projects = reshape_by_resource_type(generic_fields %>%
   # Also the fields "Subject Area" and "Participating subject areas" will be handled separately in a relation table. 
   # And we can ignore the field "Project identifier" (since it's core information is already covered by the column resource_id)
   filter(! field_name %in% c("Subject Area", "Participating subject areas", "Project identifier"))
-                                      , "project")
+                                      , "project") %>%
+
+
+
 
 people = reshape_by_resource_type(generic_fields, "person")
 
@@ -231,25 +303,11 @@ institutions = reshape_by_resource_type(generic_fields, "institution")
 
 
 
+
+
 # Subject Areas and Participating subject areas should be handled separately and should be extracted into 
 # their own respective tables
-
-# # .split("<br>")
-# # .flatMap(_.split(", "))
-# 
-# foo = subject_area_test %>% 
-#   strsplit("<br> ") %>%
-#   unlist %>%
-#   strsplit(", ") %>%
-#   unlist
-# 
-# foo
-# typeof(foo)
-# foo[2]
-# 
-# 
 # subject_area_test = "Theoretical Computer Science <br> Interactive and Intelligent Systems, Image and Language Processing, Computer Graphics and Visualisation"
-  
 
 extract_subject_areas_from_generic_fields = function(generic_fields, subject_area_column_name) {
   return(
@@ -282,3 +340,11 @@ project_participating_subject_areas = extract_subject_areas_from_generic_fields(
 
 # TODO: we could investigate wether a more accurate splitting is possible by doing a matching with the crawled and extracted subject areas 
 # from the catalog search form of the GEPRIS system or the "official" webpage which lists the subject areas
+
+
+
+
+
+
+
+
