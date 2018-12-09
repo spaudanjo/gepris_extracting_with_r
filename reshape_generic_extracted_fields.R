@@ -242,14 +242,18 @@ project_relations = project_relations_from_project_pages %>%
 
 View(unique(project_relations$relation_type))
 
+cleaned_project_relations = project_relations %>%
+  select(-relation_found_on) %>%
+  unique()
+  
+
+
 # foo = Reduce(function(project_relations, synonym_group){
 #   return(
 #     project_relations %>%
 #       mutate(relation_type = ifelse(relation_type %in% synonym_group, synonym_group[1], relation_type))
 #   )
 # }, project_relations_from_project_pages, accumulate = F)
-
-bar
 
 
 
