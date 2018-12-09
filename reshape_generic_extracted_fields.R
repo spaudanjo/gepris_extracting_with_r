@@ -154,25 +154,31 @@ project_relations_from_project_pages = generic_fields %>%
 str(project_relations_from_project_pages)
 # merge project_relations_from_project_pages and project_relations_from_non_project_pages
 project_relations = project_relations_from_project_pages %>% 
-  bind_rows(project_relations_from_non_project_pages)
-
-
-
-
-
-
-
+  bind_rows(project_relations_from_non_project_pages) %>% 
 
 
 # TODO: replace synonyms in project_relations_from_project_pages$relation_type (cluster synonyms (like c("Applicant", "Applicants")))
 
 # Reduce(f = "-", x = 1:6, accumulate = T)
 
-synonym_groups = c(
-  c("Applicant", "Applicants", "As Applicant")
-)
+# synonym_groups = c(
+#   c("Applicant", "Applicants", "As Applicant")
+# )
+
 
 # I identified the following groups which should be 'normalised' to only one of their representations
+
+# Applicant
+# Applicants
+# As Applicant
+
+# Co-Applicant
+# Co-applicants
+# Co-applicant
+# Co-Applicants
+# As Co-Applicant
+# As Co-applicant
+
 # As Former applicant
 # Former applicant
 # Former applicants
@@ -216,17 +222,25 @@ synonym_groups = c(
 # Participating Institution
 # Participating institution
 
-foo = project_relations %>% 
-  mutate(relation_type = case_when(
-    relation_type %in% c("Applicant", "Applicants", "As Applicant") ~ "Applicant",
+  mutate(relation_type = case_when( 
+    relation_type %in% c("Applicant", "Applicants", "As Applicant") ~ "Applicant", 
     relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
-    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
-    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
-    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
-    relation_type %in% c("Co-Applicant", "Co-applicants", "Co-applicant", "Co-Applicants", "As Co-Applicant", "As Co-applicant") ~ "Co-Applicant", 
-    TRUE ~ relation_type
-    )
-  )
+    relation_type %in% c("As Former applicant", "Former applicant", "Former applicants") ~ "Former applicant", 
+    relation_type %in% c("As Cooperation partner", "Cooperation partner", "Cooperation partners") ~ "Cooperation partner", 
+    relation_type %in% c("As Deputy spokesperson", "Deputy spokespeople", "Deputy spokesperson") ~ "Deputy spokesperson", 
+    relation_type %in% c("As Foreign spokesperson", "Foreign spokespeople", "Foreign spokesperson") ~ "Foreign spokesperson", 
+    relation_type %in% c("As Head", "Head", "Heads") ~ "Head", 
+    relation_type %in% c("As International Co-Applicant", "International Co-Applicant", "International Co-Applicants") ~ "International Co-Applicant", 
+    relation_type %in% c("As Participating Person", "Participating Person", "Participating Persons") ~ "Participating Person", 
+    relation_type %in% c("As Participating scientist", "Participating scientist", "Participating scientists") ~ "Participating scientist", 
+    relation_type %in% c("As Project leader", "Project leader", "Project leaders") ~ "Project leader", 
+    relation_type %in% c("As Spokesperson", "Spokesperson", "Spokespersons") ~ "Spokesperson", 
+    relation_type %in% c("Participating Institution", "Participating institution") ~ "Participating Institution", 
+    TRUE ~ relation_type 
+    ) 
+  ) 
+
+View(unique(project_relations$relation_type))
 
 # foo = Reduce(function(project_relations, synonym_group){
 #   return(
