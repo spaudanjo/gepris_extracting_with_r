@@ -419,12 +419,53 @@ term
 typeof(term)
 # term = c("since 1993<br>")
 
-term = ifelse(
+start_year = ifelse(
   !is.na(str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
   str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")[,2],
-  term
-)[,2]
-term
+  ifelse(
+    !is.na(str_match(term, "^.*since ([0-9]+).*$")), 
+    str_match(term, "^.*since ([0-9]+).*$")[,2],
+    ifelse(
+      !is.na(str_match(term, "^.*Funded in ([0-9]+).*$")), 
+      str_match(term, "^.*Funded in ([0-9]+).*$")[,2],
+      ifelse(
+        !is.na(str_match(term, "^.*until ([0-9]+).*$")), 
+        NA,
+        ifelse(
+          !is.na(str_match(term, "^.*Currently being funded.*$")), 
+          "ongoing",
+          NA
+        )
+      )
+    )
+  )
+)[,1]
+View(start_year)
+
+end_year = ifelse(
+  !is.na(str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
+  str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")[,3],
+  ifelse(
+    !is.na(str_match(term, "^.*since ([0-9]+).*$")), 
+    NA,
+    ifelse(
+      !is.na(str_match(term, "^.*Funded in ([0-9]+).*$")), 
+      str_match(term, "^.*Funded in ([0-9]+).*$")[,2],
+      ifelse(
+        !is.na(str_match(term, "^.*until ([0-9]+).*$")), 
+        str_match(term, "^.*until ([0-9]+).*$")[,2],
+        ifelse(
+          !is.na(str_match(term, "^.*Currently being funded.*$")), 
+          "ongoing",
+          NA
+        )
+      )
+    )
+  )
+)[,1]
+end_year
+
+
 
 term = ifelse(
   !is.na(str_match(term, "^.*since ([0-9]+).*$")), 
