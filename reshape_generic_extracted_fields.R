@@ -217,115 +217,6 @@ cleaned_project_relations = project_relations %>%
 
 
 
-extract_start_and_end_year_of_term = function(term_str) {
-  # return(c(1234, 9876))
-  # print("INSIDE OF extract_start_and_end_year_of_term")
-  # print(term_str)
-  # 
-  # 
-  # return(paste(":::::", term_str))
-  
-  from_to = str_match(term_str, "^.*from ([0-9]+) to ([0-9]+).*$")
-  if(length(from_to) == 3 && !is.na(from_to[1])) {
-    # print("FROM_TO")
-    # print(from_to)
-    return(c(from_to[2], from_to[3]))
-  }
-  
-  since = str_match(term_str, "^.*since ([0-9]+).*$")
-  if(length(since) == 2 && !is.na(since[1])) {
-    return(c(since[2], NA))
-  }
-  
-  fundedIn = str_match(term_str, "^.*Funded in ([0-9]+).*$")
-  if(length(fundedIn) == 2 && !is.na(fundedIn[1])) {
-    return(c(fundedIn[2], fundedIn[2]))
-  }
-  
-  until = str_match(term_str, "^.*until ([0-9]+).*$")
-  if(length(until) == 2 && !is.na(until[1])) {
-    return(c(NA, until[2]))
-  }
-  
-  ongoing = str_match(term_str, "^.*Currently being funded.*$")
-  if(length(ongoing) == 1 && !is.na(ongoing[1])) {
-    return(c("ongoing", "ongoing"))
-  }
-  
-  return(c(NA, NA))
-}
-
-test_vector = c(
-  "from 1995 to 2004", "since 2016<br>", "Funded in 2005", "until 2008<br>", "Currently being funded.", "asd3jf fajksj 5"
-)
-foo = function(term) {
-  # ifelse(!is.na(str_match(term, "^.*since ([0-9]+).*$")),'outside','inside')
-  ifelse(
-    !is.na(str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")[2]), str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")[2],
-    ifelse(
-      !is.na(str_match(term, "^.*since ([0-9]+).*$")), str_match(term, "^.*since ([0-9]+).*$")[2],
-      NA
-    )
-    )[,1]
-  # ifelse(grepl("non",df$loc_01),'outside','inside')
-  # 3
-}
-foo(test_vector)
-
-bar = function(a) {
-  ifelse(a > 3, 'JUP', 'NOPE')
-}
-bar(c(1,2,3,4,5,6))
-
-# Check this approach: https://jennybc.github.io/purrr-tutorial/bk00_vectors-and-lists.html
-library(purrr)
-map(test_vector, function(term_str) {
-  
-  from_to = str_match(term_str, "^.*from ([0-9]+) to ([0-9]+).*$")
-  if(length(from_to) == 3 && !is.na(from_to[1])) {
-    # print("FROM_TO")
-    # print(from_to)
-    return(c(from_to[2], from_to[3]))
-  }
-  
-  since = str_match(term_str, "^.*since ([0-9]+).*$")
-  if(length(since) == 2 && !is.na(since[1])) {
-    return(c(since[2], NA))
-  }
-  
-  fundedIn = str_match(term_str, "^.*Funded in ([0-9]+).*$")
-  if(length(fundedIn) == 2 && !is.na(fundedIn[1])) {
-    return(c(fundedIn[2], fundedIn[2]))
-  }
-  
-  until = str_match(term_str, "^.*until ([0-9]+).*$")
-  if(length(until) == 2 && !is.na(until[1])) {
-    return(c(NA, until[2]))
-  }
-  
-  ongoing = str_match(term_str, "^.*Currently being funded.*$")
-  if(length(ongoing) == 1 && !is.na(ongoing[1])) {
-    return(c("ongoing", "ongoing"))
-  }
-  
-  return(c(NA, NA))
-})
-
-
-
-
-extract_start_and_end_year_of_term(test_vector)
-  
-# length(str_match("from 1995 to 2004", "^.*from ([0-9]+) to ([0-9]+).*$"))
-# length(str_match("since 2016<br>", "^.*since ([0-9]+).*$"))
-# length(str_match("Funded in 2005", "^.*Funded in ([0-9]+).*$"))
-extract_start_and_end_year_of_term("from 1995 to 2004")[1]
-extract_start_and_end_year_of_term("since 2016<br>")[1]
-extract_start_and_end_year_of_term("Funded in 2005")
-extract_start_and_end_year_of_term("until 2008<br>")
-extract_start_and_end_year_of_term("Currently being funded.")
-extract_start_and_end_year_of_term("asd3jf fajksj 5")
-
 
 projects = reshape_by_resource_type(generic_fields %>%
 # For projects, we wan't to remove alle fields (that would be transformed now into columns) that 
@@ -358,19 +249,19 @@ projects = reshape_by_resource_type(generic_fields %>%
     )
   )[,1]) %>%
   mutate(funding_end_year = ifelse(
-    !is.na(str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
-    str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")[,3],
+    !is.na(str_match(Term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
+    str_match(Term, "^.*from ([0-9]+) to ([0-9]+).*$")[,3],
     ifelse(
-      !is.na(str_match(term, "^.*since ([0-9]+).*$")), 
+      !is.na(str_match(Term, "^.*since ([0-9]+).*$")), 
       NA,
       ifelse(
-        !is.na(str_match(term, "^.*Funded in ([0-9]+).*$")), 
-        str_match(term, "^.*Funded in ([0-9]+).*$")[,2],
+        !is.na(str_match(Term, "^.*Funded in ([0-9]+).*$")), 
+        str_match(Term, "^.*Funded in ([0-9]+).*$")[,2],
         ifelse(
-          !is.na(str_match(term, "^.*until ([0-9]+).*$")), 
-          str_match(term, "^.*until ([0-9]+).*$")[,2],
+          !is.na(str_match(Term, "^.*until ([0-9]+).*$")), 
+          str_match(Term, "^.*until ([0-9]+).*$")[,2],
           ifelse(
-            !is.na(str_match(term, "^.*Currently being funded.*$")), 
+            !is.na(str_match(Term, "^.*Currently being funded.*$")), 
             "ongoing",
             NA
           )
@@ -378,165 +269,12 @@ projects = reshape_by_resource_type(generic_fields %>%
       )
     )
   )[,1]) %>%
-  # rowwise() %>%
-  # mutate(funding_end_year = (map(Term, extract_start_and_end_year_of_term))[1]) # %>%
   select(-Term)
-
-extract_start_and_end_year_of_term(projects$Term[30])[1]
-
 
 people = reshape_by_resource_type(generic_fields, "person")
 
 institutions = reshape_by_resource_type(generic_fields, "institution")
 
-
-
-
-
-
-
-
-
-
-foo2 = reshape_by_resource_type(generic_fields %>%
-  # For projects, we wan't to remove alle fields (that would be transformed now into columns) that 
-  # have relationship character, as these are handled separately in the cleaned_project_relations table
-  filter(! field_name %in% project_relation_field_names) %>%
-  # Also the fields "Subject Area" and "Participating subject areas" will be handled separately in a relation table. 
-  # And we can ignore the field "Project identifier" (since it's core information is already covered by the column resource_id)
-  filter(! field_name %in% c("Subject Area", "Participating subject areas", "Project identifier")), 
-  "project") #%>%
-  # mutate(Term = as.character(Term)) %>%
-  # head(500)
-
-# from_to = str_match(term_str, "^.*from ([0-9]+) to ([0-9]+).*$")
-foo3 = map(foo2$Term, extract_start_and_end_year_of_term)
-foo4 = ifelse(
-  is.character(foo2$Term), 
-  T, 
-  F)
-foo4
-
-
-
-
-# since = str_match(term_str, "^.*since ([0-9]+).*$")
-# if(length(since) == 2 && !is.na(since[1])) {
-#   return(c(since[2], NA))
-# }
-# 
-# fundedIn = str_match(term_str, "^.*Funded in ([0-9]+).*$")
-# if(length(fundedIn) == 2 && !is.na(fundedIn[1])) {
-#   return(c(fundedIn[2], fundedIn[2]))
-# }
-# 
-# until = str_match(term_str, "^.*until ([0-9]+).*$")
-# if(length(until) == 2 && !is.na(until[1])) {
-#   return(c(NA, until[2]))
-# }
-# 
-# ongoing = str_match(term_str, "^.*Currently being funded.*$")
-# if(length(ongoing) == 1 && !is.na(ongoing[1])) {
-#   return(c("ongoing", "ongoing"))
-# }
-
-
-str_match(foo2$Term, "^.*Funded in ([0-9]+).*$")
-
-foo10 = ifelse(
-  !is.na(str_match(foo2$Term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
-  str_match(foo2$Term, "^.*from ([0-9]+) to ([0-9]+).*$")[,2],
-  ifelse(
-    !is.na(str_match(foo2$Term, "^.*since ([0-9]+).*$")), 
-    str_match(foo2$Term, "^.*since ([0-9]+).*$")[,2],
-    NA
-  )
-)
-
-term = foo2$Term
-term = foo2$Term[450:490]
-term = foo2$Term[486]
-term
-typeof(term)
-# term = c("since 1993<br>")
-
-start_year = ifelse(
-  !is.na(str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
-  str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")[,2],
-  ifelse(
-    !is.na(str_match(term, "^.*since ([0-9]+).*$")), 
-    str_match(term, "^.*since ([0-9]+).*$")[,2],
-    ifelse(
-      !is.na(str_match(term, "^.*Funded in ([0-9]+).*$")), 
-      str_match(term, "^.*Funded in ([0-9]+).*$")[,2],
-      ifelse(
-        !is.na(str_match(term, "^.*until ([0-9]+).*$")), 
-        NA,
-        ifelse(
-          !is.na(str_match(term, "^.*Currently being funded.*$")), 
-          "ongoing",
-          NA
-        )
-      )
-    )
-  )
-)[,1]
-View(start_year)
-
-end_year = ifelse(
-  !is.na(str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
-  str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")[,3],
-  ifelse(
-    !is.na(str_match(term, "^.*since ([0-9]+).*$")), 
-    NA,
-    ifelse(
-      !is.na(str_match(term, "^.*Funded in ([0-9]+).*$")), 
-      str_match(term, "^.*Funded in ([0-9]+).*$")[,2],
-      ifelse(
-        !is.na(str_match(term, "^.*until ([0-9]+).*$")), 
-        str_match(term, "^.*until ([0-9]+).*$")[,2],
-        ifelse(
-          !is.na(str_match(term, "^.*Currently being funded.*$")), 
-          "ongoing",
-          NA
-        )
-      )
-    )
-  )
-)[,1]
-end_year
-
-
-
-term = ifelse(
-  !is.na(str_match(term, "^.*since ([0-9]+).*$")), 
-  str_match(term, "^.*since ([0-9]+).*$")[,2],
-  term
-)[,2]
-  
-term
-
-str_match("since 1993<br>", "^.*from ([0-9]+) to ([0-9]+).*$")
-str_match("since 1993<br>", "^.*since ([0-9]+).*$")
-# 486
-# since 1993<br>
-# 702141
-# 702141
-
-
-bar1 = c(0,1,2,3,4,5,6,7,8,9,10)
-
-ifelse(
-  bar1 > 3, 
-  100, 
-  bar1
-)
-  
-ifelse(
-  bar1 % 2 == 0,
-  50, 
-  NA
-)
 
 
 
