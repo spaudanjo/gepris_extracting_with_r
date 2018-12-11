@@ -336,10 +336,51 @@ projects = reshape_by_resource_type(generic_fields %>%
   filter(! field_name %in% c("Subject Area", "Participating subject areas", "Project identifier"))
                                       , "project") %>%
   # mutate(funding_start_year = extract_start_and_end_year_of_term(Term)[[1]]) %>%
-  mutate(funding_start_year = Term) %>%
+  mutate(funding_start_year = ifelse(
+    !is.na(str_match(Term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
+    str_match(Term, "^.*from ([0-9]+) to ([0-9]+).*$")[,2],
+    ifelse(
+      !is.na(str_match(Term, "^.*since ([0-9]+).*$")), 
+      str_match(Term, "^.*since ([0-9]+).*$")[,2],
+      ifelse(
+        !is.na(str_match(Term, "^.*Funded in ([0-9]+).*$")), 
+        str_match(Term, "^.*Funded in ([0-9]+).*$")[,2],
+        ifelse(
+          !is.na(str_match(Term, "^.*until ([0-9]+).*$")), 
+          NA,
+          ifelse(
+            !is.na(str_match(Term, "^.*Currently being funded.*$")), 
+            "ongoing",
+            NA
+          )
+        )
+      )
+    )
+  )[,1]) %>%
+  mutate(funding_end_year = ifelse(
+    !is.na(str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
+    str_match(term, "^.*from ([0-9]+) to ([0-9]+).*$")[,3],
+    ifelse(
+      !is.na(str_match(term, "^.*since ([0-9]+).*$")), 
+      NA,
+      ifelse(
+        !is.na(str_match(term, "^.*Funded in ([0-9]+).*$")), 
+        str_match(term, "^.*Funded in ([0-9]+).*$")[,2],
+        ifelse(
+          !is.na(str_match(term, "^.*until ([0-9]+).*$")), 
+          str_match(term, "^.*until ([0-9]+).*$")[,2],
+          ifelse(
+            !is.na(str_match(term, "^.*Currently being funded.*$")), 
+            "ongoing",
+            NA
+          )
+        )
+      )
+    )
+  )[,1]) %>%
   # rowwise() %>%
-  mutate(funding_end_year = (map(Term, extract_start_and_end_year_of_term))[1]) # %>%
-#   select(-Term)
+  # mutate(funding_end_year = (map(Term, extract_start_and_end_year_of_term))[1]) # %>%
+  select(-Term)
 
 extract_start_and_end_year_of_term(projects$Term[30])[1]
 
