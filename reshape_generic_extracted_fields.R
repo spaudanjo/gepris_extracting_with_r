@@ -220,7 +220,7 @@ cleaned_project_relations = project_relations %>%
 
 
 
-url_pattern = "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+url_pattern = "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+~]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
 
 projects = reshape_by_resource_type(generic_fields %>%
 # For projects, we wan't to remove alle fields (that would be transformed now into columns) that 
@@ -291,15 +291,16 @@ people = reshape_by_resource_type(generic_fields, "person") %>%
   mutate(Name = gsub("&nbsp;", "", Name)) %>%
   rename(Email = `E-Mail`) %>%
   mutate(Email = gsub("<img src=\\\"\\/gepris\\/images\\/at_symbol\\.png\\\" alt=\\\"@\\\">", "@", Email)) %>%
+  rowwise() %>%
+  mutate(Website = str_extract(Website, url_pattern)) %>%
   select(-V1)
-
-
-foo = people$`E-Mail`[!is.na(people$`E-Mail`)]
 
 
 institutions = reshape_by_resource_type(generic_fields, "institution") %>%
   rename(Name = ResourceTitle) %>%
   rename(InstitutionId = resource_id) %>%
+  rowwise() %>%
+  mutate(Website = str_extract(Website, url_pattern)) %>%
   select(InstitutionId, Name, everything()) %>%
   select(-V1)
 
