@@ -283,9 +283,37 @@ projects = reshape_by_resource_type(generic_fields %>%
 # select(df, -one_of(excluded_vars))
   select(-Term)
 
-people = reshape_by_resource_type(generic_fields, "person")
+people = reshape_by_resource_type(generic_fields, "person") %>% 
+  rename(Name = ResourceTitle) %>%
+  rename(PersonId = resource_id) %>%
+  select(PersonId, Name, everything()) %>%
+  mutate(Died = ifelse(!is.na(str_match(Name, ".*(\\(†\\)).*")), T, F)[,1]) %>%
+  mutate(Name = gsub("\\(†\\)", "", Name)) %>%
+  mutate(Name = gsub("&nbsp;", "", Name)) %>%
+  select(-V1)
 
-institutions = reshape_by_resource_type(generic_fields, "institution")
+
+ifelse(!is.na(str_match(people$Name, ".*(\\(†\\)).*")), T, F)
+
+foo = people$Name %>%
+  str_match("^.*( \\(†\\)).*$")
+
+died = people[people$PersonId == "5149",]
+died$Name
+# str_match(died$Name, "\\(†\\)")
+str_match(died$Name, ".*(\\(†\\)).*")
+
+foo[!is.na(foo)]
+# (†)
+
+
+
+institutions = reshape_by_resource_type(generic_fields, "institution") %>%
+  rename(Name = ResourceTitle) %>%
+  rename(InstitutionId = resource_id) %>%
+  select(InstitutionId, Name, everything()) %>%
+  select(-V1)
+
 
 
 
