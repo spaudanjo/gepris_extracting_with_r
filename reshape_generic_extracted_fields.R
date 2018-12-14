@@ -3,6 +3,7 @@ setwd("/Users/dspaude/code/b-arbeit/gepris-crawls/DQ-Notebook-with-crawl-from_fi
 if (!require("tidyr")) install.packages("tidyr")
 if (!require("dplyr")) install.packages("dplyr")
 if (!require("stringr")) install.packages("stringr")
+if (!require("rvest")) install.packages("rvest")
 
 library(tidyr)
 library(dplyr)
@@ -218,6 +219,9 @@ cleaned_project_relations = project_relations %>%
 
 
 
+
+url_pattern = "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+
 projects = reshape_by_resource_type(generic_fields %>%
 # For projects, we wan't to remove alle fields (that would be transformed now into columns) that 
 # have relationship character, as these are handled separately in the cleaned_project_relations table
@@ -274,6 +278,9 @@ projects = reshape_by_resource_type(generic_fields %>%
       )
     )
   )[,1]) %>%
+  rowwise() %>%
+  mutate(Website = str_extract(Website, url_pattern)) %>%
+# select(df, -one_of(excluded_vars))
   select(-Term)
 
 people = reshape_by_resource_type(generic_fields, "person")
