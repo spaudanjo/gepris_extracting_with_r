@@ -280,7 +280,6 @@ projects = reshape_by_resource_type(generic_fields %>%
   )[,1]) %>%
   rowwise() %>%
   mutate(Website = str_extract(Website, url_pattern)) %>%
-# select(df, -one_of(excluded_vars))
   select(-Term)
 
 people = reshape_by_resource_type(generic_fields, "person") %>% 
@@ -290,22 +289,12 @@ people = reshape_by_resource_type(generic_fields, "person") %>%
   mutate(Died = ifelse(!is.na(str_match(Name, ".*(\\(†\\)).*")), T, F)[,1]) %>%
   mutate(Name = gsub("\\(†\\)", "", Name)) %>%
   mutate(Name = gsub("&nbsp;", "", Name)) %>%
+  rename(Email = `E-Mail`) %>%
+  mutate(Email = gsub("<img src=\\\"\\/gepris\\/images\\/at_symbol\\.png\\\" alt=\\\"@\\\">", "@", Email)) %>%
   select(-V1)
 
 
-ifelse(!is.na(str_match(people$Name, ".*(\\(†\\)).*")), T, F)
-
-foo = people$Name %>%
-  str_match("^.*( \\(†\\)).*$")
-
-died = people[people$PersonId == "5149",]
-died$Name
-# str_match(died$Name, "\\(†\\)")
-str_match(died$Name, ".*(\\(†\\)).*")
-
-foo[!is.na(foo)]
-# (†)
-
+foo = people$`E-Mail`[!is.na(people$`E-Mail`)]
 
 
 institutions = reshape_by_resource_type(generic_fields, "institution") %>%
@@ -313,10 +302,6 @@ institutions = reshape_by_resource_type(generic_fields, "institution") %>%
   rename(InstitutionId = resource_id) %>%
   select(InstitutionId, Name, everything()) %>%
   select(-V1)
-
-
-
-
 
 
 
