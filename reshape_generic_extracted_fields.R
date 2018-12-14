@@ -224,7 +224,12 @@ projects = reshape_by_resource_type(generic_fields %>%
   filter(! field_name %in% project_relation_field_names) %>%
   # Also the fields "Subject Area" and "Participating subject areas" will be handled separately in a relation table. 
   # And we can ignore the field "Project identifier" (since it's core information is already covered by the column resource_id)
-  filter(! field_name %in% c("Subject Area", "Participating subject areas", "Project identifier"))
+  filter(! field_name %in% c(
+    "Subject Area", 
+    "Participating subject areas", 
+    "Project identifier",
+    "International Connection"
+    ))
                                       , "project") %>%
   # mutate(funding_start_year = extract_start_and_end_year_of_term(Term)[[1]]) %>%
   mutate(funding_start_year = ifelse(
@@ -323,6 +328,22 @@ project_participating_subject_areas = extract_subject_areas_from_generic_fields(
 # from the catalog search form of the GEPRIS system or the "official" webpage which lists the subject areas
 
 
+
+
+project_international_connections = generic_fields %>% 
+  filter(resource_type == "project") %>%
+  filter(field_name == "International Connection") %>%
+  # 1. split by <br>
+  mutate(field_value = strsplit(as.character(field_value), "<br> ")) %>% 
+  unnest(field_value) %>%
+  # 2. split by comma
+  mutate(field_value = strsplit(as.character(field_value), ", ")) %>% 
+  unnest(field_value) %>%
+  select(
+    project_id = resource_id,
+    country = field_value
+  ) %>%
+  mutate(country = gsub("<br>", "", country))
 
 
 
