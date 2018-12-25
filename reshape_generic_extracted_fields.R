@@ -1,4 +1,4 @@
-setwd("/Users/dspaude/code/b-arbeit/gepris-crawls/DQ-Notebook-with-crawl-from_final_2018-10-28--11-07-37-EN/stage2")
+setwd("/Users/dspaude/code/b-arbeit/gepris-crawls/2018-12-14--19-48-38-EN/stage2")
 
 if (!require("tidyr")) install.packages("tidyr")
 if (!require("dplyr")) install.packages("dplyr")
@@ -234,8 +234,9 @@ projects = reshape_by_resource_type(generic_fields %>%
     "Project identifier",
     "International Connection"
     ))
+# The following nested if else and regex based logic is extracting the funding start and end year 
+# from the 'Term' field. 
                                       , "project") %>%
-  # mutate(funding_start_year = extract_start_and_end_year_of_term(Term)[[1]]) %>%
   mutate(funding_start_year = ifelse(
     !is.na(str_match(Term, "^.*from ([0-9]+) to ([0-9]+).*$")), 
     str_match(Term, "^.*from ([0-9]+) to ([0-9]+).*$")[,2],
@@ -365,9 +366,3 @@ project_international_connections = generic_fields %>%
     country = field_value
   ) %>%
   mutate(country = gsub("<br>", "", country))
-
-
-
-
-
-
